@@ -37,9 +37,8 @@ export default function ConstructionCanvas({
       if (!containerRef.current) return;
       const { width, height } = containerRef.current.getBoundingClientRect();
       
-      // На мобилке отступы меньше
-      const paddingX = 40; 
-      const paddingY = 60; 
+      const paddingX = 120; 
+      const paddingY = 100; 
       const availableWidth = Math.max(100, width - paddingX);
       const availableHeight = Math.max(100, height - paddingY);
 
@@ -65,11 +64,11 @@ export default function ConstructionCanvas({
         justifyContent: 'center', 
         alignItems: 'center',
         width: '100%', 
-        height: '50vh', 
-        minHeight: '250px',
-        padding: '10px', 
+        height: '65vh', 
+        minHeight: '500px',
+        padding: '20px', 
         background: '#f9fafb', 
-        overflow: 'hidden',
+        overflow: 'auto',
         position: 'relative'
       }}
     >
@@ -78,22 +77,22 @@ export default function ConstructionCanvas({
           position: 'relative', 
           paddingTop: '20px', 
           paddingRight: '20px',
-          width: (totalWidth * scale) + 30,
-          height: (maxHeight * scale) + 30,
+          width: (totalWidth * scale) + 40,
+          height: (maxHeight * scale) + 40,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center'
         }}>
           
           {/* Общая ширина сверху */}
-          <div style={{ position: 'absolute', top: '0px', left: 0, right: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', fontSize: '10px' }}>
+          <div style={{ position: 'absolute', top: '0px', left: 0, right: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', fontSize: '14px' }}>
             <span style={{ borderTop: '1px solid #ef4444', flex: 1, marginRight: '4px' }}></span>
             {totalWidth}
             <span style={{ borderTop: '1px solid #ef4444', flex: 1, marginLeft: '4px' }}></span>
           </div>
 
-          {/* Общая высота (справа) */}
-          <div style={{ position: 'absolute', top: '20px', bottom: '20px', right: '-10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#ef4444', fontSize: '10px' }}>
+          {/* Общая высота справа */}
+          <div style={{ position: 'absolute', top: '20px', bottom: '20px', right: '-10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#ef4444', fontSize: '14px' }}>
             <span style={{ borderRight: '1px solid #ef4444', flex: 1, marginBottom: '4px' }}></span>
             <span style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>{maxHeight}</span>
             <span style={{ borderRight: '1px solid #ef4444', flex: 1, marginTop: '4px' }}></span>
@@ -101,7 +100,7 @@ export default function ConstructionCanvas({
 
           {/* Сама конструкция */}
           <div className="sketch-container" style={{ 
-            border: '2px solid #000', 
+            border: '4px solid #000', 
             display: 'flex', 
             flexDirection: 'row', 
             alignItems: 'flex-end', 
@@ -111,7 +110,9 @@ export default function ConstructionCanvas({
             position: 'relative'
           }}>
             {construction.items.map((item, index) => {
-              const isBlockSelected = selectedBlockId === item.id || (item.type === 'window' && selectedBlockId === item.data.id);
+              // Исправление ошибки типов: проверяем тип элемента
+              const itemId = item.type === 'connector' ? item.id : item.data.id;
+              const isBlockSelected = selectedBlockId === itemId;
               const itemWidth = item.type === 'connector' ? item.width : item.data.width;
 
               if (item.type === 'connector') {
@@ -132,9 +133,14 @@ export default function ConstructionCanvas({
                       cursor: 'pointer',
                       position: 'relative',
                       borderRight: '1px solid #000',
-                      boxShadow: isBlockSelected ? 'inset 0 0 0 2px #3b82f6' : 'none'
+                      boxShadow: isBlockSelected ? 'inset 0 0 0 3px #3b82f6' : 'none'
                     }} 
                   >
+                    {isBlockSelected && (
+                      <div style={{ position: 'absolute', top: '-30px', left: '50%', transform: 'translateX(-50%)', zIndex: 20, fontSize: '12px', padding: '2px', background: '#fff', border: '1px solid #ccc', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+                        {CONNECTOR_LABELS[item.connectorType]}
+                      </div>
+                    )}
                   </div>
                 );
               }
@@ -167,25 +173,23 @@ export default function ConstructionCanvas({
                     showDimensions={false}
                   />
                   
-                  {/* Ширина окна снизу (скрываем на мобилке, если слишком мелко) */}
-                  {scale > 0.1 && (
-                    <div style={{ 
-                      position: 'absolute', 
-                      bottom: '-20px',
-                      left: 0, 
-                      right: 0, 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      color: '#ef4444', 
-                      fontSize: '8px',
-                      fontWeight: 'bold'
-                    }}>
-                      <span style={{ borderTop: '1px solid #ef4444', flex: 1, marginRight: '2px' }}></span>
-                      {item.data.width}
-                      <span style={{ borderTop: '1px solid #ef4444', flex: 1, marginLeft: '2px' }}></span>
-                    </div>
-                  )}
+                  {/* Ширина окна снизу */}
+                  <div style={{ 
+                    position: 'absolute', 
+                    bottom: '-35px',
+                    left: 0, 
+                    right: 0, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    color: '#ef4444', 
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}>
+                    <span style={{ borderTop: '1px solid #ef4444', flex: 1, marginRight: '4px' }}></span>
+                    {item.data.width}
+                    <span style={{ borderTop: '1px solid #ef4444', flex: 1, marginLeft: '4px' }}></span>
+                  </div>
                 </div>
               );
             })}
